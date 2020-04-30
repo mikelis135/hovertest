@@ -1,4 +1,4 @@
-package com.usehover.hoverstarter;
+package com.usehover.hovertest;
 
 import org.junit.Test;
 
