@@ -1,2 +1,0 @@
-# hovertest
-test hover sdk
