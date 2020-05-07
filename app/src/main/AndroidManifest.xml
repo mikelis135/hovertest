@@ -9,20 +9,40 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name="com.usehover.hovertest.MainActivity">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <activity
+            android:name=".profile.ProfileActivity"
+            android:label="@string/profile"
+            android:parentActivityName=".transaction.NewTransactionActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.usehover.hovertest.transaction.NewTransactionActivity" />
+
+        </activity>
+
+        <activity
+            android:name=".transaction.NewTransactionActivity"
+            android:parentActivityName=".home.HomeActivity">
+            <intent-filter>
+                <action android:name="com.hover.sdk.RETURN_FROM_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".home.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="com.hover.sdk.RETURN_FROM_SETTINGS" />
-            </intent-filter>
         </activity>
+
+
         <meta-data
             android:name="com.hover.ApiKey"
-            android:value="95b5521a598455d531c9f82d6102bdcf"/>
+            android:value="95b5521a598455d531c9f82d6102bdcf" />
     </application>
 
 </manifest>
