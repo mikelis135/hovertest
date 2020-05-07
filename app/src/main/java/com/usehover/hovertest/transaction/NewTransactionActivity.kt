@@ -458,7 +458,6 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.airtimeSelfAction)
                             .extra("amount", amountValue)
-
                 }
             }
 
