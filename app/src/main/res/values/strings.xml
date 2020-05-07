@@ -11,8 +11,8 @@
     <string name="accountNumber">Account number</string>
     <string name="others">Others  \t</string>
     <string name="self">Self  \t</string>
-    <string name="save">Save for reuse  \t</string>
-    <string name="dont_save">Don\'t save \t</string>
+    <string name="save">Save\t</string>
+    <string name="dont_save">Don\'t save\t</string>
     <string name="profile">Profile</string>
     <string name="permission_note">Next, we need your permission to make UnifyPay work seamlessly</string>
     <string name="permission">Permit</string>
@@ -26,6 +26,7 @@
     <string name="ussd">Add Ussd</string>
     <string name="send_money">Send Money</string>
     <string name="buy_data">Buy Data</string>
+    <string name="get_data_bundle">Get data bundles</string>
     <string name="buy_airtime">Buy Airtime</string>
     <string name="sending_money">Sending Money</string>
     <string name="buying_data">Buying Data</string>
@@ -39,4 +40,5 @@
     <string name="internet_needed">Internet is required for this setup.\nJust one time..promise 😃</string>
     <string name="setup">Setup</string>
     <string name="setup_done">Setup complete!\nNow check your profile to select your default</string>
+    <string name="data_bundle">Data Bundle</string>
 </resources>

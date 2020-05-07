@@ -1,6 +1,5 @@
 package com.usehover.hovertest.home
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
@@ -8,7 +7,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -27,7 +25,6 @@ import com.usehover.hovertest.model.Transaction
 import com.usehover.hovertest.model.TransactionTypes
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.activity_home.toolbar
-import kotlinx.android.synthetic.main.profile_activity.*
 import java.lang.Boolean.FALSE
 import java.lang.Boolean.TRUE
 import java.util.ArrayList
@@ -40,7 +37,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
     private lateinit var prefManager: PrefManager
     private lateinit var hoverParameters: HoverParameters.Builder
     val simName = arrayListOf<String>()
-
+    lateinit var alertDialogBuilder: AlertDialog.Builder
     private var advertMessage = ""
     private var transactionValue = ""
 
@@ -56,6 +53,8 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         prefManager = PrefManager(this)
 
         setUpActions()
+
+        setUpDialog()
 
         Hover.initialize(this, this@HomeActivity)
 
@@ -116,11 +115,8 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
     }
 
     private fun showDeleteDialog(position: Int) {
-        val builder = AlertDialog.Builder(this@HomeActivity, R.style.dialogStyle)
-        builder.setCancelable(true)
-        builder.setMessage(getString(R.string.delete_saved_transaction_prompt))
 
-        builder.setPositiveButton("Yes") { _, _ ->
+        alertDialogBuilder.setPositiveButton("Yes") { _, _ ->
             homeAdapter.let {
                 val newTransactionList = it.removeTransaction(position)
                 prefManager.saveTransactions(newTransactionList)
@@ -130,8 +126,15 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
             }
 
         }
-        builder.setNegativeButton("NO") { dialog, _ -> dialog.dismiss() }
-        builder.show()
+        alertDialogBuilder.show()
+    }
+
+
+    private fun setUpDialog() {
+        alertDialogBuilder = AlertDialog.Builder(this@HomeActivity, R.style.dialogStyle)
+        alertDialogBuilder.setCancelable(true)
+        alertDialogBuilder.setMessage(getString(R.string.delete_saved_transaction_prompt))
+        alertDialogBuilder.setNegativeButton("NO") { dialog, _ -> dialog.dismiss() }
     }
 
     private fun selectTransaction(transaction: Transaction) {
@@ -192,6 +195,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.dataOthersAction)
                             .extra("phone", transaction.phone)
+                            .extra("option", transaction.dataOptionValue)
 
                 }
                 FALSE -> {
@@ -200,6 +204,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .style(R.style.AppTheme)
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.dataSelfAction)
+                            .extra("option", transaction.dataOptionValue)
                 }
             }
             TransactionTypes.TRANSFER -> {
