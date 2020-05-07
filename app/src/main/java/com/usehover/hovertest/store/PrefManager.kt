@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.hover.sdk.actions.HoverAction
+import com.hover.sdk.sims.SimInfo
 import com.usehover.hovertest.model.Transaction
 import java.util.ArrayList
 
@@ -121,12 +122,12 @@ class PrefManager(private val _context: Context) {
         editor.putString(key, json).apply()
     }
 
-    fun saveSim(actions: ArrayList<String>) {
+    fun saveSim(actions: MutableList<SimInfo>) {
         genericSave(actions, SIMNAME)
     }
 
-    fun fetchSim(): ArrayList<String>? {
-        return genericFetch<ArrayList<String>>(SIMNAME)
+    fun fetchSim(): MutableList<SimInfo>? {
+        return genericFetch<MutableList<SimInfo>>(SIMNAME)
     }
 
     fun saveActions(actions: ArrayList<HoverAction>) {

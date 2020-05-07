@@ -321,8 +321,12 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
             simList.forEach {
                 simName.add(it.networkOperatorName)
             }
-            prefManager.saveSim(simName)
-            prefManager.simOSReportedHni = simList[0].osReportedHni
+
+            prefManager.saveSim(simList)
+
+            if (prefManager.simOSReportedHni.isNullOrEmpty()) {
+                prefManager.simOSReportedHni = simList[0].osReportedHni
+            }
 
         }
 

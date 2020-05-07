@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.hover.sdk.api.Hover
 import com.hover.sdk.permissions.PermissionActivity
+import com.hover.sdk.sims.SimInfo
 import com.usehover.hovertest.store.PrefManager
 import com.usehover.hovertest.R
 import kotlinx.android.synthetic.main.profile_activity.*
@@ -14,7 +15,8 @@ import kotlinx.android.synthetic.main.profile_activity.*
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var prefManager: PrefManager
-    private val simOSReportedHni = arrayListOf<String>()
+    private var simOSReportedHni = arrayListOf<String>()
+    private var simName = arrayListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +63,12 @@ class ProfileActivity : AppCompatActivity() {
             startActivityForResult(Intent(applicationContext, PermissionActivity::class.java), 0)
         } else {
             prefManager.fetchSim()?.let {
-                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, it)
+
+                it.forEach {
+                    simOSReportedHni.add(it.osReportedHni)
+                    simName.add(it.networkOperatorName)
+                }
+                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, simName)
                 simSP.adapter = arrayAdapter
             }
         }
