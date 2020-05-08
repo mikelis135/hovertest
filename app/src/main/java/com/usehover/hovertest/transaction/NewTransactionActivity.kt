@@ -73,6 +73,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
         amount.setOnEditorActionListener(this)
 
         payOfflineBtn.setOnClickListener {
+            hoverParameters = HoverParameters.Builder(this)
             pay()
         }
 
