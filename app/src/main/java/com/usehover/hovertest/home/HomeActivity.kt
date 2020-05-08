@@ -129,7 +129,6 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         alertDialogBuilder.show()
     }
 
-
     private fun setUpDialog() {
         alertDialogBuilder = AlertDialog.Builder(this@HomeActivity, R.style.dialogStyle)
         alertDialogBuilder.setCancelable(true)
@@ -232,7 +231,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                     it.name.contains("airtime others", true) -> prefManager.airtimeOthersAction = it.id
                     it.name.contains("data self", true) -> prefManager.dataSelfAction = it.id
                     it.name.contains("data others", true) -> prefManager.dataOthersAction = it.id
-                    it.name.contains("transfer self", true) -> prefManager.transferSelfAction = it.id
+                    it.name.contains("transfer gtb", true) -> prefManager.transferSelfAction = it.id
                     it.name.contains("transfer others", true) -> prefManager.transferOthersAction = it.id
                 }
 

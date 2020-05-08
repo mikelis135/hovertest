@@ -63,10 +63,17 @@ class PrefManager(private val _context: Context) {
         }
 
 
-    var dataBundleSelfAction: String?
-        get() = pref.getString(DATASELFBUNDLEACTIONID, "")
-        set(dataBundleSelfAction) {
-            editor.putString(DATASELFBUNDLEACTIONID, dataBundleSelfAction)
+    var dataBundleAction: String?
+        get() = pref.getString(DATABUNDLEACTIONID, "")
+        set(dataBundleAction) {
+            editor.putString(DATABUNDLEACTIONID, dataBundleAction)
+            editor.commit()
+        }
+
+    var accountResolveAction: String?
+        get() = pref.getString(ACCOUNTRESOLVEACTIONID, "")
+        set(accountResolveAction) {
+            editor.putString(ACCOUNTRESOLVEACTIONID, accountResolveAction)
             editor.commit()
         }
 
@@ -179,10 +186,11 @@ class PrefManager(private val _context: Context) {
         private val AIRTIMESELFACTIONID = "airtimeself"
         private val AIRTIMEOTHERSACTIONID = "airtimeothers"
         private val DATASELFACTIONID = "dataself"
-        private val DATASELFBUNDLEACTIONID = "dataselfbundle"
+        private val DATABUNDLEACTIONID = "dataselfbundle"
         private val DATAOTHERSACTIONID = "dataothers"
         private val TRANSFERSELFACTIONID = "transferself"
         private val TRANSFEROTHERSACTIONID = "transferothers"
+        private val ACCOUNTRESOLVEACTIONID = "accountresolve"
         private val ACTIONS = "actions"
         private val TRANSACTION = "transaction"
         private val ADVERT = "advert"
