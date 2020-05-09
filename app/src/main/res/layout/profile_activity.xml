@@ -94,11 +94,11 @@
             android:id="@+id/bankTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:background="#19D1D1D1"
             android:padding="5dp"
             android:text="@string/bank"
             android:textSize="12sp"
-            android:layout_marginTop="10dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/simSP" />

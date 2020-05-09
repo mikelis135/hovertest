@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/viewGroup"
     android:layout_width="match_parent"
-    android:animateLayoutChanges="true"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".transaction.NewTransactionActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -260,8 +260,8 @@
                     android:layout_height="wrap_content"
                     android:background="#fff"
                     android:importantForAutofill="no"
-                    android:inputType="phone"
-                    android:maxLength="11"
+                    android:inputType="number"
+                    android:maxLength="10"
                     android:minHeight="50dp"
                     android:padding="10dp"
                     app:layout_constraintLeft_toLeftOf="parent"

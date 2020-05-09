@@ -9,8 +9,8 @@
     <string name="setphoneNumber">Set Phone number</string>
     <string name="amount">Amount</string>
     <string name="accountNumber">Account number</string>
-    <string name="others">Others  \t</string>
-    <string name="self">Self  \t</string>
+    <string name="others">Others\t</string>
+    <string name="self">Self\t</string>
     <string name="save">Save\t</string>
     <string name="dont_save">Don\'t save\t</string>
     <string name="profile">Profile</string>
@@ -42,4 +42,6 @@
     <string name="setup">Setup</string>
     <string name="setup_done">Setup complete!\nNow check your profile to select your default</string>
     <string name="data_bundle">Data Bundle</string>
+    <string name="other_banks">Other banks\t</string>
+    <string name="to">to %1$s\t</string>
 </resources>

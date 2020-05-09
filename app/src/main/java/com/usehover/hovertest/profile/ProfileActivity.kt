@@ -2,14 +2,12 @@ package com.usehover.hovertest.profile
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.hover.sdk.api.Hover
 import com.hover.sdk.permissions.PermissionActivity
-import com.hover.sdk.sims.SimInfo
-import com.usehover.hovertest.store.PrefManager
 import com.usehover.hovertest.R
+import com.usehover.hovertest.store.PrefManager
 import kotlinx.android.synthetic.main.profile_activity.*
 
 class ProfileActivity : AppCompatActivity() {
@@ -44,6 +42,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun saveProfile() {
+
         prefManager.bankName = bankSP.selectedItem.toString()
         prefManager.bankPosition = bankSP.selectedItemPosition
         prefManager.simPosition = simSP.selectedItemPosition
@@ -65,8 +64,8 @@ class ProfileActivity : AppCompatActivity() {
             prefManager.fetchSim()?.let {
 
                 it.forEach {
-                    simOSReportedHni.add(it.osReportedHni)
-                    simName.add(it.networkOperatorName)
+                    simOSReportedHni.add(it.osReportedHni.toString())
+                    simName.add(it.operatorName.toString())
                 }
                 val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, simName)
                 simSP.adapter = arrayAdapter

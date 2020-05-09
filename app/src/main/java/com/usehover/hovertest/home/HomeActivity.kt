@@ -16,28 +16,26 @@ import com.hover.sdk.actions.HoverAction
 import com.hover.sdk.api.Hover
 import com.hover.sdk.api.HoverParameters
 import com.hover.sdk.permissions.PermissionActivity
-import com.usehover.hovertest.*
+import com.usehover.hovertest.R
 import com.usehover.hovertest.event.OnTransactionSelectedListener
+import com.usehover.hovertest.model.Transaction
+import com.usehover.hovertest.model.TransactionTypes
 import com.usehover.hovertest.profile.ProfileActivity
 import com.usehover.hovertest.store.PrefManager
 import com.usehover.hovertest.transaction.NewTransactionActivity
-import com.usehover.hovertest.model.Transaction
-import com.usehover.hovertest.model.TransactionTypes
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.activity_home.toolbar
 import java.lang.Boolean.FALSE
 import java.lang.Boolean.TRUE
-import java.util.ArrayList
+import java.util.*
 
 class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
-
 
     private var homeAdapter: HomeAdapter = HomeAdapter(arrayListOf(), null)
 
     private lateinit var prefManager: PrefManager
     private lateinit var hoverParameters: HoverParameters.Builder
-    val simName = arrayListOf<String>()
-    lateinit var alertDialogBuilder: AlertDialog.Builder
+    private val simName = arrayListOf<String>()
+    private lateinit var alertDialogBuilder: AlertDialog.Builder
     private var advertMessage = ""
     private var transactionValue = ""
 
@@ -206,8 +204,24 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .extra("option", transaction.dataOptionValue)
                 }
             }
-            TransactionTypes.TRANSFER -> {
-
+            TransactionTypes.TRANSFER -> when (transaction.isOthers) {
+                TRUE -> {
+                    hoverParameters = HoverParameters.Builder(this)
+                            .setSim(transaction.simOSReportedHni)
+                            .initialProcessingMessage(transaction.message + advertMessage)
+                            .setHeader(transactionValue).request(prefManager.transferOthersAction)
+                            .extra("amount", transaction.amount)
+                            .extra("account", transaction.accountNumberValue)
+                            .extra("option", transaction.accountOptionValue)
+                }
+                FALSE -> {
+                    hoverParameters = HoverParameters.Builder(this)
+                            .setSim(transaction.simOSReportedHni)
+                            .initialProcessingMessage(transaction.message + advertMessage)
+                            .setHeader(transactionValue).request(prefManager.transferSelfAction)
+                            .extra("amount", transaction.amount)
+                            .extra("account", transaction.accountNumberValue)
+                }
             }
         }
 
@@ -266,8 +280,6 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
     override fun onResume() {
 
-        checkPermissionDone()
-
         populateRecycler()
 
         super.onResume()
@@ -284,7 +296,6 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
         return when (item?.itemId) {
             R.id.profile -> {
-                startActivityForResult(Intent(applicationContext, PermissionActivity::class.java), 0)
                 setupSim()
                 startActivity(Intent(this, ProfileActivity::class.java))
                 true
@@ -352,14 +363,6 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         }
     }
 
-    private fun checkPermissionDone() {
-        if (!prefManager.fetchSim().isNullOrEmpty()) {
-            welcomeTxt.text = getString(R.string.welcome_note)
-            setupBtn.visibility = View.GONE
-            newTransactionFab.visibility = View.VISIBLE
-        }
-    }
-
     private fun welcomeCheck() {
 
         setupView()
@@ -380,6 +383,5 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         }
 
     }
-
 
 }
