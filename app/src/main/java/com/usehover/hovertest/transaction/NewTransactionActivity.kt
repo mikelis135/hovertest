@@ -278,6 +278,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
                 when {
                     it.name.contains("airtime self", true) -> prefManager.airtimeSelfAction = it.id
+                    it.name.contains("account balance", true) -> prefManager.accountBalanceAction = it.id
                     it.name.contains("airtime others", true) -> prefManager.airtimeOthersAction = it.id
                     it.name.contains("data bundle", true) -> prefManager.dataBundleAction = it.id
                     it.name.contains("account resolve", true) -> prefManager.accountResolveAction = it.id
@@ -313,7 +314,9 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
         transaction = when {
             transactionTypeSP.selectedItem.toString().contains(AIRTIME.name, true) -> getString(R.string.buying_airtime)
             transactionTypeSP.selectedItem.toString().contains(DATA.name, true) -> getString(R.string.buying_data)
-            else -> getString(R.string.sending_money)
+            transactionTypeSP.selectedItem.toString().contains(TRANSFER.name, true) -> getString(R.string.sending_money)
+            transactionTypeSP.selectedItem.toString().contains(BALANCE.name, true) -> getString(R.string.account_balance)
+            else -> getString(R.string.empty)
         }
 
         try {
@@ -484,6 +487,8 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                             .extra("amount", amountValue)
                             .extra("account", accountNumberValue)
                 }
+            }
+            BALANCE -> {
             }
         }
 

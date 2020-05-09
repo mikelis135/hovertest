@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken
 import com.hover.sdk.actions.HoverAction
 import com.hover.sdk.sims.SimInfo
 import com.usehover.hovertest.model.Transaction
-import java.util.ArrayList
+import java.util.*
 
 class PrefManager(private val _context: Context) {
     private val pref: SharedPreferences
@@ -47,6 +47,13 @@ class PrefManager(private val _context: Context) {
             editor.commit()
         }
 
+
+    var accountBalanceAction: String?
+        get() = pref.getString(ACCOUNTBALANCEACTIONID, "")
+        set(accountBalanceAction) {
+            editor.putString(ACCOUNTBALANCEACTIONID, accountBalanceAction)
+            editor.commit()
+        }
 
     var airtimeSelfAction: String?
         get() = pref.getString(AIRTIMESELFACTIONID, "")
@@ -191,6 +198,7 @@ class PrefManager(private val _context: Context) {
         private val TRANSFERSELFACTIONID = "transferself"
         private val TRANSFEROTHERSACTIONID = "transferothers"
         private val ACCOUNTRESOLVEACTIONID = "accountresolve"
+        private val ACCOUNTBALANCEACTIONID = "accountbalance"
         private val ACTIONS = "actions"
         private val TRANSACTION = "transaction"
         private val ADVERT = "advert"

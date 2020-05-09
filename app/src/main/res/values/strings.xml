@@ -44,4 +44,7 @@
     <string name="data_bundle">Data Bundle</string>
     <string name="other_banks">Other banks\t</string>
     <string name="to">to %1$s\t</string>
+    <string name="balance">Balance</string>
+    <string name="account_balance">Account Balance</string>
+    <string name="empty"> </string>
 </resources>

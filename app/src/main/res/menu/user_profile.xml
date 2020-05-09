@@ -8,4 +8,10 @@
         android:title="@string/profile"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/balance"
+        android:icon="@drawable/ic_account_balance_wallet_black_24dp"
+        android:title="@string/balance"
+        app:showAsAction="ifRoom" />
+
 </menu>

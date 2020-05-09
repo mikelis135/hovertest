@@ -18,9 +18,6 @@
 
     <string-array name="bank">
         <item>GTB</item>
-        <item>Access</item>
-        <item>First</item>
-        <item>UBA</item>
     </string-array>
 
 </resources>

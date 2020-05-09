@@ -19,7 +19,7 @@ import com.hover.sdk.permissions.PermissionActivity
 import com.usehover.hovertest.R
 import com.usehover.hovertest.event.OnTransactionSelectedListener
 import com.usehover.hovertest.model.Transaction
-import com.usehover.hovertest.model.TransactionTypes
+import com.usehover.hovertest.model.TransactionTypes.*
 import com.usehover.hovertest.profile.ProfileActivity
 import com.usehover.hovertest.store.PrefManager
 import com.usehover.hovertest.transaction.NewTransactionActivity
@@ -139,9 +139,10 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         try {
 
             transactionValue = when {
-                transaction.transactionType.toString().contains(TransactionTypes.AIRTIME.name, true) -> getString(R.string.buying_airtime)
-                transaction.transactionType.toString().contains(TransactionTypes.DATA.name, true) -> getString(R.string.buying_data)
-                else -> getString(R.string.sending_money)
+                transaction.transactionType.toString().contains(AIRTIME.name, true) -> getString(R.string.buying_airtime)
+                transaction.transactionType.toString().contains(DATA.name, true) -> getString(R.string.buying_data)
+                transaction.transactionType.toString().contains(TRANSFER.name, true) -> getString(R.string.sending_money)
+                else -> getString(R.string.empty)
             }
 
             hoverParameters = checkActionRequest(transaction)
@@ -159,7 +160,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         when (transaction.transactionType) {
 
 
-            TransactionTypes.AIRTIME -> when (transaction.isOthers) {
+            AIRTIME -> when (transaction.isOthers) {
 
                 //check the param from the steps from api response and add the extras to the hover parameters
 
@@ -182,7 +183,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                 }
             }
 
-            TransactionTypes.DATA -> when (transaction.isOthers) {
+            DATA -> when (transaction.isOthers) {
 
                 //check the param from the steps from api response and add the extras to the hover parameters
 
@@ -204,7 +205,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .extra("option", transaction.dataOptionValue)
                 }
             }
-            TransactionTypes.TRANSFER -> when (transaction.isOthers) {
+            TRANSFER -> when (transaction.isOthers) {
                 TRUE -> {
                     hoverParameters = HoverParameters.Builder(this)
                             .setSim(transaction.simOSReportedHni)
@@ -222,6 +223,12 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .extra("amount", transaction.amount)
                             .extra("account", transaction.accountNumberValue)
                 }
+            }
+            BALANCE -> {
+                hoverParameters = HoverParameters.Builder(this)
+                        .setSim(transaction.simOSReportedHni)
+                        .initialProcessingMessage(transaction.message + advertMessage)
+                        .setHeader(transactionValue).request(prefManager.accountBalanceAction)
             }
         }
 
@@ -241,6 +248,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
             if (it.name.contains(prefManager.bankName.toString(), true)) {
 
                 when {
+                    it.name.contains("account balance", true) -> prefManager.accountBalanceAction = it.id
                     it.name.contains("airtime self", true) -> prefManager.airtimeSelfAction = it.id
                     it.name.contains("airtime others", true) -> prefManager.airtimeOthersAction = it.id
                     it.name.contains("data self", true) -> prefManager.dataSelfAction = it.id
@@ -296,8 +304,20 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
         return when (item?.itemId) {
             R.id.profile -> {
-                setupSim()
+                saveSimDetails()
                 startActivity(Intent(this, ProfileActivity::class.java))
+                true
+            }
+            R.id.balance -> {
+                val transaction = Transaction(BALANCE)
+                prefManager.simOSReportedHni?.let {
+                    transaction.simOSReportedHni = it
+                }
+                transaction.message = advertMessage
+                transactionValue = getString(R.string.account_balance)
+                val hoverParameters = checkActionRequest(transaction)
+                val intent = hoverParameters.buildIntent()
+                startActivityForResult(intent, 0)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -312,7 +332,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
             setupBtn.visibility = View.VISIBLE
             newTransactionFab.visibility = View.GONE
             startActivityForResult(Intent(applicationContext, PermissionActivity::class.java), 0)
-            setupSim()
+            saveSimDetails()
             setupBank()
         } else {
             welcomeTxt.text = getString(R.string.welcome_note)
@@ -321,7 +341,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         }
     }
 
-    private fun setupSim() {
+    private fun saveSimDetails() {
 
         val simList = Hover.getPresentSims(this@HomeActivity)
         simName.clear()
@@ -375,7 +395,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
             } else {
                 checkPermissionAccepted()
-                setupSim()
+                saveSimDetails()
                 setupBank()
                 startActivity(Intent(this, ProfileActivity::class.java))
             }
