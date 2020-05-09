@@ -255,9 +255,8 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
     override fun onError(error: String?) {
 
-        if (prefManager.fetchActions().isNullOrEmpty()) {
-
-            setupBtn.setOnClickListener {
+        setupBtn.setOnClickListener {
+            if (prefManager.fetchActions().isNullOrEmpty()) {
                 actionsPb.visibility = View.VISIBLE
                 Hover.initialize(this, this@HomeActivity)
             }
