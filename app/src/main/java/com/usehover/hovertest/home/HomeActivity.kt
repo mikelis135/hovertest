@@ -210,6 +210,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .setSim(transaction.simOSReportedHni)
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.airtimeOthersAction)
+                            .style(R.style.AppTheme)
                             .extra("phone", transaction.phone)
                             .extra("amount", amount)
                 }

@@ -47,15 +47,28 @@ class HomeAdapter(private var transactionList: ArrayList<Transaction>, val liste
 
         fun bind(transaction: Transaction, position: Int) {
 
-            val details = transaction.phone + transaction.accountNumberValue
+            var details = ""
+
+            when (transaction.transactionType) {
+                TransactionTypes.Airtime -> {
+                    containerView.transactionIcon.setImageResource(R.drawable.ic_call_black_24dp)
+                    details = transaction.phone
+                }
+                TransactionTypes.Data -> {
+                    containerView.transactionIcon.setImageResource(R.drawable.ic_internet)
+                    details = transaction.phone
+                }
+                TransactionTypes.Transfer -> {
+                    containerView.transactionIcon.setImageResource(R.drawable.ic_send)
+                    details = transaction.accountNumberValue
+                }
+            }
+
+
             containerView.details.text = details
             containerView.amount.text = transaction.transactionType.name + " - " + transaction.amount
 
-            when (transaction.transactionType) {
-                TransactionTypes.Airtime -> containerView.transactionIcon.setImageResource(R.drawable.ic_call_black_24dp)
-                TransactionTypes.Data -> containerView.transactionIcon.setImageResource(R.drawable.ic_internet)
-                TransactionTypes.Transfer -> containerView.transactionIcon.setImageResource(R.drawable.ic_send)
-            }
+
             containerView.deleteBtn.setOnClickListener {
                 listener?.onTransactionDelete(position)
             }
