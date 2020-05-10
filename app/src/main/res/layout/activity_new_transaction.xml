@@ -121,7 +121,7 @@
                 android:id="@+id/dataBundleLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintTop_toBottomOf="@id/transactionTypeLayout">
 
                 <TextView
@@ -162,47 +162,11 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/amountLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/dataBundleLayout">
-
-                <TextView
-                    android:id="@+id/amountTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:background="#19D1D1D1"
-                    android:labelFor="@id/amount"
-                    android:padding="5dp"
-                    android:text="@string/amount"
-                    android:textSize="12sp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <EditText
-                    android:id="@+id/amount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#fff"
-                    android:imeOptions="actionDone"
-                    android:importantForAutofill="no"
-                    android:inputType="phone"
-                    android:minHeight="50dp"
-                    android:padding="10dp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/amountTitle" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/phoneNumberLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/amountLayout">
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/dataBundleLayout">
 
                 <TextView
                     android:id="@+id/phoneNumberTitle"
@@ -237,7 +201,7 @@
                 android:id="@+id/accountNumberLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintTop_toBottomOf="@id/phoneNumberLayout">
 
                 <TextView
@@ -270,11 +234,47 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/amountLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/accountNumberLayout">
+
+                <TextView
+                    android:id="@+id/amountTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="#19D1D1D1"
+                    android:labelFor="@id/amount"
+                    android:padding="5dp"
+                    android:text="@string/amount"
+                    android:textSize="12sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#fff"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="phone"
+                    android:minHeight="50dp"
+                    android:padding="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/amountTitle" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/bankLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/accountNumberLayout">
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/amountLayout">
 
                 <TextView
                     android:id="@+id/bankTitle"
@@ -332,8 +332,9 @@
     <Button
         android:id="@+id/payOfflineBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="20dp"
+        android:textColor="@color/white"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="30dp"
         android:text="@string/pay"

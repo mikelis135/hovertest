@@ -1,8 +1,8 @@
 package com.usehover.hovertest.model
 
 enum class TransactionTypes {
-    AIRTIME,
-    DATA,
-    TRANSFER,
-    BALANCE
+    Airtime,
+    Data,
+    Transfer,
+    Balance
 }

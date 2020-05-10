@@ -1,7 +1,6 @@
 package com.usehover.hovertest.home
 
 import android.content.Intent
-import android.graphics.drawable.InsetDrawable
 import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -11,8 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hover.sdk.actions.HoverAction
 import com.hover.sdk.api.Hover
@@ -50,9 +47,11 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
         setSupportActionBar(toolbar)
 
-        recyclerSetup()
-
         prefManager = PrefManager(this)
+
+        //  addSampleTransaction()
+
+        recyclerSetup()
 
         setupVoice()
 
@@ -79,13 +78,15 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
     }
 
     private fun recyclerSetup() {
-        val itemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
-        val divider = ContextCompat.getDrawable(transactionRecycler.context, R.drawable.divider)
-        val inset = resources.getDimensionPixelSize(R.dimen._10dp)
-        val insetDivider = InsetDrawable(divider, inset, 0, inset, 0)
-        itemDecoration.setDrawable(insetDivider)
-        transactionRecycler.addItemDecoration(itemDecoration)
         transactionRecycler.layoutManager = LinearLayoutManager(this)
+    }
+
+    //delete
+    private fun addSampleTransaction() {
+        prefManager.saveTransaction(Transaction(Airtime, "₦400", "08023838292", "Airtime hey", true, "", "", "", ""))
+        prefManager.saveTransaction(Transaction(Data, "₦100 MB", "08023838292", "Data Hey", false, "", "", "", ""))
+        prefManager.saveTransaction(Transaction(Transfer, "₦40, 000", "08023838292", "Transfer Hey", true, "", "", "", ""))
+
     }
 
     private fun populateRecycler() {
@@ -180,9 +181,9 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         try {
 
             transactionValue = when {
-                transaction.transactionType.toString().contains(AIRTIME.name, true) -> getString(R.string.buying_airtime)
-                transaction.transactionType.toString().contains(DATA.name, true) -> getString(R.string.buying_data)
-                transaction.transactionType.toString().contains(TRANSFER.name, true) -> getString(R.string.sending_money)
+                transaction.transactionType.toString().contains(Airtime.name, true) -> getString(R.string.buying_airtime)
+                transaction.transactionType.toString().contains(Data.name, true) -> getString(R.string.buying_data)
+                transaction.transactionType.toString().contains(Transfer.name, true) -> getString(R.string.sending_money)
                 else -> getString(R.string.empty)
             }
 
@@ -201,9 +202,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         when (transaction.transactionType) {
 
 
-            AIRTIME -> when (transaction.isOthers) {
-
-                //check the param from the steps from api response and add the extras to the hover parameters
+            Airtime -> when (transaction.isOthers) {
 
                 TRUE -> {
 
@@ -214,63 +213,75 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .extra("phone", transaction.phone)
                             .extra("amount", amount)
                 }
+
                 FALSE -> {
                     hoverParameters = HoverParameters.Builder(this)
                             .setSim(transaction.simOSReportedHni)
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.airtimeSelfAction)
+                            .style(R.style.AppTheme)
                             .extra("amount", amount)
 
                 }
             }
 
-            DATA -> when (transaction.isOthers) {
-
-                //check the param from the steps from api response and add the extras to the hover parameters
+            Data -> when (transaction.isOthers) {
 
                 TRUE -> {
+
                     hoverParameters = HoverParameters.Builder(this)
                             .setSim(transaction.simOSReportedHni)
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.dataOthersAction)
+                            .style(R.style.AppTheme)
                             .extra("phone", transaction.phone)
                             .extra("option", transaction.dataOptionValue)
 
                 }
+
                 FALSE -> {
                     hoverParameters = HoverParameters.Builder(this)
                             .setSim(transaction.simOSReportedHni)
                             .style(R.style.AppTheme)
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.dataSelfAction)
+                            .style(R.style.AppTheme)
                             .extra("option", transaction.dataOptionValue)
                 }
+
             }
-            TRANSFER -> when (transaction.isOthers) {
+
+            Transfer -> when (transaction.isOthers) {
+
                 TRUE -> {
-                    hoverParameters = HoverParameters.Builder(this)
-                            .setSim(transaction.simOSReportedHni)
-                            .initialProcessingMessage(transaction.message + advertMessage)
-                            .setHeader(transactionValue).request(prefManager.transferOthersAction)
-                            .extra("amount", transaction.amount)
-                            .extra("account", transaction.accountNumberValue)
-                            .extra("option", transaction.accountOptionValue)
+
+                    val intent = Intent(this, NewTransactionActivity::class.java)
+                    intent.putExtra("account", transaction.accountNumberValue)
+                    intent.putExtra("amount", transaction.amount)
+                    startActivity(intent)
                 }
+
                 FALSE -> {
                     hoverParameters = HoverParameters.Builder(this)
                             .setSim(transaction.simOSReportedHni)
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.transferSelfAction)
+                            .style(R.style.AppTheme)
                             .extra("amount", transaction.amount)
                             .extra("account", transaction.accountNumberValue)
                 }
+
             }
-            BALANCE -> {
+
+            Balance -> {
+
                 hoverParameters = HoverParameters.Builder(this)
                         .setSim(transaction.simOSReportedHni)
                         .initialProcessingMessage(transaction.message + advertMessage)
                         .setHeader(transactionValue).request(prefManager.accountBalanceAction)
+                        .style(R.style.AppTheme)
             }
+
         }
 
         return hoverParameters
@@ -351,16 +362,23 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                 true
             }
             R.id.balance -> {
-                say("Account balance...please enter your pin")
-                val transaction = Transaction(BALANCE)
-                prefManager.simOSReportedHni?.let {
-                    transaction.simOSReportedHni = it
+
+                if (!prefManager.fetchActions().isNullOrEmpty()) {
+                    say("Account balance...please enter your pin")
+                    val transaction = Transaction(Balance)
+                    prefManager.simOSReportedHni?.let {
+                        transaction.simOSReportedHni = it
+                    }
+                    transaction.message = advertMessage
+                    transactionValue = getString(R.string.account_balance)
+                    try {
+                        val hoverParameters = checkActionRequest(transaction)
+                        val intent = hoverParameters.buildIntent()
+                        startActivityForResult(intent, 0)
+                    } catch (ignore: java.lang.Exception) {
+
+                    }
                 }
-                transaction.message = advertMessage
-                transactionValue = getString(R.string.account_balance)
-                val hoverParameters = checkActionRequest(transaction)
-                val intent = hoverParameters.buildIntent()
-                startActivityForResult(intent, 0)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -445,8 +463,6 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
             }
 
         }
-
-//        say("Welcome to Unify Pay")
 
     }
 

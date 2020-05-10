@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.usehover.hovertest.R
 import com.usehover.hovertest.event.OnTransactionSelectedListener
 import com.usehover.hovertest.model.Transaction
+import com.usehover.hovertest.model.TransactionTypes
 import kotlinx.android.synthetic.main.transaction_item.view.*
 
 class HomeAdapter(private var transactionList: ArrayList<Transaction>, val listener: OnTransactionSelectedListener?) : RecyclerView.Adapter<HomeAdapter.ViewHolder>() {
@@ -46,10 +47,16 @@ class HomeAdapter(private var transactionList: ArrayList<Transaction>, val liste
 
         fun bind(transaction: Transaction, position: Int) {
 
-            containerView.details.text = transaction.transactionType.toString()
-            containerView.amount.text = transaction.details + transaction.amount
+            val details = transaction.phone + transaction.accountNumberValue
+            containerView.details.text = details
+            containerView.amount.text = transaction.transactionType.name + " - " + transaction.amount
 
-            containerView.repeatBtn.setOnClickListener {
+            when (transaction.transactionType) {
+                TransactionTypes.Airtime -> containerView.transactionIcon.setImageResource(R.drawable.ic_call_black_24dp)
+                TransactionTypes.Data -> containerView.transactionIcon.setImageResource(R.drawable.ic_internet)
+                TransactionTypes.Transfer -> containerView.transactionIcon.setImageResource(R.drawable.ic_send)
+            }
+            containerView.deleteBtn.setOnClickListener {
                 listener?.onTransactionDelete(position)
             }
 

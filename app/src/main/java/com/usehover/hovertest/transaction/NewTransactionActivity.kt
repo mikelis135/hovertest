@@ -9,8 +9,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -33,7 +31,6 @@ import com.usehover.hovertest.store.PrefManager
 import kotlinx.android.synthetic.main.activity_new_transaction.*
 import java.lang.Boolean.FALSE
 import java.lang.Boolean.TRUE
-
 
 class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
@@ -79,6 +76,8 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
         phoneNumberCheck()
 
         amount.setOnEditorActionListener(this)
+
+        repeatTransfer()
 
         payOfflineBtn.setOnClickListener {
             hoverParameters = HoverParameters.Builder(this)
@@ -248,22 +247,6 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.user_ussd, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-
-        return when (item?.itemId) {
-            R.id.ussd -> {
-//                startActivity(Intent(this, ProfileActivity::class.java))
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     private fun setUpActions() {
 
         prefManager.fetchActions()?.forEach {
@@ -295,27 +278,27 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
     private fun validateTransaction() {
         when (transactionType) {
-            AIRTIME -> validateAirtime()
-            DATA -> validateData()
-            TRANSFER -> validateTransfer()
+            Airtime -> validateAirtime()
+            Data -> validateData()
+            Transfer -> validateTransfer()
         }
     }
 
     private fun setUpTransaction() {
         when (transactionType) {
-            AIRTIME -> setUpAirtime()
-            DATA -> setUpData()
-            TRANSFER -> setUpTransfer()
+            Airtime -> setUpAirtime()
+            Data -> setUpData()
+            Transfer -> setUpTransfer()
         }
     }
 
     private fun processTransaction() {
 
         transaction = when {
-            transactionTypeSP.selectedItem.toString().contains(AIRTIME.name, true) -> getString(R.string.buying_airtime)
-            transactionTypeSP.selectedItem.toString().contains(DATA.name, true) -> getString(R.string.buying_data)
-            transactionTypeSP.selectedItem.toString().contains(TRANSFER.name, true) -> getString(R.string.sending_money)
-            transactionTypeSP.selectedItem.toString().contains(BALANCE.name, true) -> getString(R.string.account_balance)
+            transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> getString(R.string.buying_airtime)
+            transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> getString(R.string.buying_data)
+            transactionTypeSP.selectedItem.toString().contains(Transfer.name, true) -> getString(R.string.sending_money)
+            transactionTypeSP.selectedItem.toString().contains(Balance.name, true) -> getString(R.string.account_balance)
             else -> getString(R.string.empty)
         }
 
@@ -340,24 +323,24 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
 
                 when {
-                    transactionTypeSP.selectedItem.toString().contains(AIRTIME.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> {
                         setUpAirtime()
                         buttonMessage = getString(R.string.buy_airtime)
                         setUpText(getString(R.string.self), getString(R.string.others))
-                        transactionType = AIRTIME
+                        transactionType = Airtime
                     }
-                    transactionTypeSP.selectedItem.toString().contains(DATA.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> {
                         setUpData()
                         setUpText(getString(R.string.self), getString(R.string.others))
                         buttonMessage = getString(R.string.get_data_bundle)
                         setUpText(getString(R.string.self), getString(R.string.others))
-                        transactionType = DATA
+                        transactionType = Data
                     }
                     else -> {
                         setUpTransfer()
                         buttonMessage = getString(R.string.send_money)
                         setUpText(getString(R.string.to, prefManager.bankName), getString(R.string.other_banks))
-                        transactionType = TRANSFER
+                        transactionType = Transfer
                     }
                 }
 
@@ -383,6 +366,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                         .setSim(simOSReportedHniValue)
                         .initialProcessingMessage(message + advertMessage)
                         .setHeader(transaction).request(prefManager.dataBundleAction)
+                        .style(R.style.AppTheme)
                         .extra("phone", phoneValue)
 
             }
@@ -391,6 +375,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                         .setSim(simOSReportedHniValue)
                         .initialProcessingMessage(message + advertMessage)
                         .setHeader(transaction).request(prefManager.dataBundleAction)
+                        .style(R.style.AppTheme)
             }
         }
 
@@ -408,6 +393,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                 .setSim(simOSReportedHniValue)
                 .initialProcessingMessage(message + advertMessage)
                 .setHeader(transaction).request(prefManager.accountResolveAction)
+                .style(R.style.AppTheme)
                 .extra("amount", amountValue)
                 .extra("account", accountNumberValue)
 
@@ -427,13 +413,14 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
         when (transactionType) {
 
-            AIRTIME -> when (othersSwt.isChecked) {
+            Airtime -> when (othersSwt.isChecked) {
 
                 TRUE -> {
                     hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
                             .setSim(simOSReportedHniValue)
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.airtimeOthersAction)
+                            .style(R.style.AppTheme)
                             .extra("phone", phoneValue)
                             .extra("amount", amountValue)
                 }
@@ -442,11 +429,13 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                             .setSim(simOSReportedHniValue)
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.airtimeSelfAction)
+                            .style(R.style.AppTheme)
+                            .style(R.style.AppTheme)
                             .extra("amount", amountValue)
                 }
             }
 
-            DATA -> when (othersSwt.isChecked) {
+            Data -> when (othersSwt.isChecked) {
 
                 TRUE -> {
                     dataOptionValue = bundleOption[dataBundleSP.selectedItemPosition]
@@ -454,6 +443,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                             .setSim(simOSReportedHniValue)
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.dataOthersAction)
+                            .style(R.style.AppTheme)
                             .extra("phone", phoneValue)
                             .extra("option", dataOptionValue)
 
@@ -464,10 +454,11 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                             .setSim(simOSReportedHniValue)
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.dataSelfAction)
+                            .style(R.style.AppTheme)
                             .extra("option", dataOptionValue)
                 }
             }
-            TRANSFER -> when (othersSwt.isChecked) {
+            Transfer -> when (othersSwt.isChecked) {
 
                 TRUE -> {
                     accountOptionValue = accountOption[bankSP.selectedItemPosition]
@@ -475,20 +466,23 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                             .setSim(simOSReportedHniValue)
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.transferOthersAction)
+                            .style(R.style.AppTheme)
                             .extra("amount", amountValue)
                             .extra("account", accountNumberValue)
                             .extra("option", accountOptionValue)
                 }
                 FALSE -> {
                     hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                            .style(R.style.AppTheme)
                             .setSim(simOSReportedHniValue)
                             .initialProcessingMessage(message + advertMessage)
                             .setHeader(transaction).request(prefManager.transferSelfAction)
+                            .style(R.style.AppTheme)
                             .extra("amount", amountValue)
                             .extra("account", accountNumberValue)
                 }
             }
-            BALANCE -> {
+            Balance -> {
             }
         }
 
@@ -504,17 +498,17 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
                 when {
 
-                    transactionTypeSP.selectedItem.toString().contains(AIRTIME.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> {
                         buttonMessage = getString(R.string.buy_airtime)
                         setUpText(getString(R.string.self), getString(R.string.others))
                         animate(true, phoneNumberLayout)
                     }
 
-                    transactionTypeSP.selectedItem.toString().contains(DATA.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> {
                         animate(true, phoneNumberLayout)
                     }
 
-                    transactionTypeSP.selectedItem.toString().contains(TRANSFER.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Transfer.name, true) -> {
                         when (accountOption.isNotEmpty()) {
                             TRUE -> bankLayout.visibility = VISIBLE
                             FALSE -> bankLayout.visibility = GONE
@@ -528,16 +522,16 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
                 when {
 
-                    transactionTypeSP.selectedItem.toString().contains(AIRTIME.name, true) -> {
-                        transactionType = AIRTIME
+                    transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> {
+                        transactionType = Airtime
                         animate(false, phoneNumberLayout)
                     }
 
-                    transactionTypeSP.selectedItem.toString().contains(DATA.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> {
                         animate(false, phoneNumberLayout)
                     }
 
-                    transactionTypeSP.selectedItem.toString().contains(TRANSFER.name, true) -> {
+                    transactionTypeSP.selectedItem.toString().contains(Transfer.name, true) -> {
                         bankLayout.visibility = GONE
                         othersSwt.text = getString(R.string.to, prefManager.bankName)
                         payOfflineBtn.text = getString(R.string.send_money)
@@ -653,6 +647,8 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                 getAccountResolve()
             } else if (othersSwt.isChecked && accountOption.isNotEmpty()) {
                 processTransaction()
+            } else if (!othersSwt.isChecked) {
+                processTransaction()
             }
         } else {
             Toast.makeText(this, getString(R.string.enter_valid_account_amount), Toast.LENGTH_LONG).show()
@@ -719,7 +715,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if (transactionType == DATA) {
+                if (transactionType == Data) {
                     clearDataBundles()
                     dataBundleLayout.visibility = GONE
                     payOfflineBtn.text = getString(R.string.get_data_bundle)
@@ -746,6 +742,22 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
     private fun clearDataBundles() {
         bundleOption.clear()
         bundleValue.clear()
+    }
+
+    private fun repeatTransfer() {
+
+        intent?.let {
+            val accountString = it.getStringExtra("account")
+            val amountString = it.getStringExtra("amount")
+
+            accountString?.let {
+                accountNumber.setText(it)
+            }
+
+            amountString?.let {
+                amount.setText(it)
+            }
+        }
     }
 
 
