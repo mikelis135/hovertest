@@ -184,7 +184,7 @@ class PrefManager(private val _context: Context) {
             transactionList.add(transaction)
             genericSave(transactionList, TRANSACTION)
         } else {
-            transactionList.add(transaction)
+            transactionList.add(0, transaction)
             genericSave(transactionList, TRANSACTION)
         }
         return transactionList
