@@ -257,7 +257,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
                     val intent = Intent(this, NewTransactionActivity::class.java)
                     intent.putExtra("account", transaction.accountNumberValue)
-                    intent.putExtra("amount", transaction.amount)
+                    intent.putExtra("amount", amount)
                     startActivity(intent)
                 }
 
@@ -267,7 +267,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
                             .initialProcessingMessage(transaction.message + advertMessage)
                             .setHeader(transactionValue).request(prefManager.transferSelfAction)
                             .style(R.style.AppTheme)
-                            .extra("amount", transaction.amount)
+                            .extra("amount", amount)
                             .extra("account", transaction.accountNumberValue)
                 }
 
