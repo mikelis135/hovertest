@@ -47,4 +47,6 @@
     <string name="balance">Balance</string>
     <string name="account_balance">Account Balance</string>
     <string name="empty"> </string>
+    <string name="voice">Voice</string>
+    <string name="voice_title">Enable voice help</string>
 </resources>

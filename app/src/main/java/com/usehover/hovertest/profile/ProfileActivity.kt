@@ -31,6 +31,7 @@ class ProfileActivity : AppCompatActivity() {
 
         simSP.setSelection(prefManager.simPosition)
         bankSP.setSelection(prefManager.bankPosition)
+        voiceSwt.isChecked = prefManager.voiceEnable
 
     }
 
@@ -43,6 +44,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun saveProfile() {
 
+        prefManager.voiceEnable = voiceSwt.isChecked
         prefManager.bankName = bankSP.selectedItem.toString()
         prefManager.bankPosition = bankSP.selectedItemPosition
         prefManager.simPosition = simSP.selectedItemPosition

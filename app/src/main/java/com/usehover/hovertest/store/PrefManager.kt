@@ -19,6 +19,13 @@ class PrefManager(private val _context: Context) {
         Gson()
     }
 
+    var voiceEnable: Boolean
+        get() = pref.getBoolean(VOICEENABLE, false)
+        set(voiceEnable) {
+            editor.putBoolean(VOICEENABLE, voiceEnable)
+            editor.commit()
+        }
+
     var bankName: String?
         get() = pref.getString(BANKNAME, "")
         set(bankName) {
@@ -186,6 +193,7 @@ class PrefManager(private val _context: Context) {
         // Shared preferences file name
         private val PREF_NAME = "hover"
         private val BANKNAME = "bankname"
+        private val VOICEENABLE = "voiceenable"
         private val SIMREPORTEDHNI = "simreportedhni"
         private val SIMNAME = "simname"
         private val BANKPOSITION = "bankposition"

@@ -51,80 +51,149 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-        <TextView
-            android:id="@+id/sim"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:background="#19D1D1D1"
-            android:labelFor="@id/simSP"
-            android:padding="5dp"
-            android:text="@string/sim"
-            android:textSize="12sp"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/voiceLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/voiceTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="#19D1D1D1"
+                android:labelFor="@id/simSP"
+                android:padding="5dp"
+                android:text="@string/voice"
+                android:textSize="12sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
 
-        <Spinner
-            android:id="@+id/simSP"
+            <TextView
+                android:id="@+id/enableVoice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="@string/voice_title"
+                android:textSize="14sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/voiceTitle" />
+
+
+            <Switch
+                android:id="@+id/voiceSwt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:importantForAutofill="no"
+                android:maxLength="11"
+                android:padding="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/enableVoice" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/simLayout"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#fff"
-            android:importantForAutofill="no"
-            android:inputType="text"
-            android:maxLength="11"
-            android:minHeight="50dp"
-            android:padding="10dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sim" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:src="@drawable/ic_arrow_down"
-            app:layout_constraintBottom_toBottomOf="@id/simSP"
-            app:layout_constraintRight_toRightOf="@id/simSP"
-            app:layout_constraintTop_toTopOf="@id/simSP"
-            tools:ignore="ContentDescription" />
-
-
-        <TextView
-            android:id="@+id/bankTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="#19D1D1D1"
-            android:padding="5dp"
-            android:text="@string/bank"
-            android:textSize="12sp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/simSP" />
+            app:layout_constraintTop_toBottomOf="@id/voiceLayout">
 
-        <Spinner
-            android:id="@+id/bankSP"
+            <TextView
+                android:id="@+id/sim"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="#19D1D1D1"
+                android:labelFor="@id/simSP"
+                android:padding="5dp"
+                android:text="@string/sim"
+                android:textSize="12sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/simSP"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#fff"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLength="11"
+                android:minHeight="50dp"
+                android:padding="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sim" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:src="@drawable/ic_arrow_down"
+                app:layout_constraintBottom_toBottomOf="@id/simSP"
+                app:layout_constraintRight_toRightOf="@id/simSP"
+                app:layout_constraintTop_toTopOf="@id/simSP"
+                tools:ignore="ContentDescription" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bankLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#fff"
-            android:entries="@array/bank"
-            android:minHeight="50dp"
-            android:padding="10dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/bankTitle" />
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/simLayout">
 
-        <ImageView
-            android:id="@+id/bankArrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:src="@drawable/ic_arrow_down"
-            app:layout_constraintBottom_toBottomOf="@id/bankSP"
-            app:layout_constraintRight_toRightOf="@id/bankSP"
-            app:layout_constraintTop_toTopOf="@id/bankSP"
-            tools:ignore="ContentDescription" />
+            <TextView
+                android:id="@+id/bankTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#19D1D1D1"
+                android:padding="5dp"
+                android:text="@string/bank"
+                android:textSize="12sp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/bankSP"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#fff"
+                android:entries="@array/bank"
+                android:minHeight="50dp"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/bankTitle" />
+
+            <ImageView
+                android:id="@+id/bankArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:src="@drawable/ic_arrow_down"
+                app:layout_constraintBottom_toBottomOf="@id/bankSP"
+                app:layout_constraintRight_toRightOf="@id/bankSP"
+                app:layout_constraintTop_toTopOf="@id/bankSP"
+                tools:ignore="ContentDescription" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

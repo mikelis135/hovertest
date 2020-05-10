@@ -2,7 +2,9 @@ package com.usehover.hovertest.home
 
 import android.content.Intent
 import android.graphics.drawable.InsetDrawable
+import android.os.Build
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -30,12 +32,14 @@ import java.util.*
 
 class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
+
     private var homeAdapter: HomeAdapter = HomeAdapter(arrayListOf(), null)
 
     private lateinit var prefManager: PrefManager
     private lateinit var hoverParameters: HoverParameters.Builder
     private val simName = arrayListOf<String>()
     private lateinit var alertDialogBuilder: AlertDialog.Builder
+    private lateinit var textToSpeech: TextToSpeech
     private var advertMessage = ""
     private var transactionValue = ""
 
@@ -50,6 +54,8 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
         prefManager = PrefManager(this)
 
+        setupVoice()
+
         setUpActions()
 
         setUpDialog()
@@ -63,6 +69,7 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         populateRecycler()
 
         newTransactionFab.setOnClickListener {
+            say("New transaction")
             if (prefManager.fetchSim().isNullOrEmpty()) {
                 startActivityForResult(Intent(applicationContext, PermissionActivity::class.java), 0)
             } else {
@@ -132,6 +139,40 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         alertDialogBuilder.setCancelable(true)
         alertDialogBuilder.setMessage(getString(R.string.delete_saved_transaction_prompt))
         alertDialogBuilder.setNegativeButton("NO") { dialog, _ -> dialog.dismiss() }
+    }
+
+    private fun setupVoice() {
+        textToSpeech = TextToSpeech(this, TextToSpeech.OnInitListener {
+            if (it == TextToSpeech.SUCCESS) {
+                textToSpeech.apply {
+                    language = Locale.UK
+                    setPitch(0.6f)
+                }
+                say(getString(R.string.welcome_note))
+            } else {
+                Log.d("okh", "Oops, i have a bad voice at the moment")
+            }
+
+        })
+
+    }
+
+    private fun say(whatToSay: String) {
+        if (prefManager.voiceEnable) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                textToSpeech.speak(whatToSay, TextToSpeech.QUEUE_FLUSH, null, null)
+            } else {
+                textToSpeech.speak(whatToSay, TextToSpeech.QUEUE_FLUSH, null)
+            }
+        }
+    }
+
+    override fun finish() {
+        if (textToSpeech.isSpeaking) {
+            textToSpeech.stop()
+            textToSpeech.shutdown()
+        }
+        super.finish()
     }
 
     private fun selectTransaction(transaction: Transaction) {
@@ -304,11 +345,13 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
 
         return when (item?.itemId) {
             R.id.profile -> {
+                say("Set Profile here")
                 saveSimDetails()
                 startActivity(Intent(this, ProfileActivity::class.java))
                 true
             }
             R.id.balance -> {
+                say("Account balance...please enter your pin")
                 val transaction = Transaction(BALANCE)
                 prefManager.simOSReportedHni?.let {
                     transaction.simOSReportedHni = it
@@ -372,12 +415,13 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
         if (prefManager.fetchActions().isNullOrEmpty()) {
 
             welcomeTxt.text = getString(R.string.internet_needed)
+            say(getString(R.string.internet_needed))
             newTransactionFab.visibility = View.GONE
             setupBtn.visibility = View.VISIBLE
 
         } else {
-
             welcomeTxt.text = getString(R.string.welcome_note)
+            say(getString(R.string.welcome_note))
             newTransactionFab.visibility = View.VISIBLE
             setupBtn.visibility = View.GONE
         }
@@ -401,6 +445,8 @@ class HomeActivity : AppCompatActivity(), Hover.DownloadListener {
             }
 
         }
+
+//        say("Welcome to Unify Pay")
 
     }
 
