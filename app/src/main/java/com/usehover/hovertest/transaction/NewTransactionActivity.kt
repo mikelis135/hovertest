@@ -757,6 +757,8 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
             amountString?.let {
                 amount.setText(it)
             }
+
+            transactionTypeSP.setSelection(2)
         }
     }
 
