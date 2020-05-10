@@ -19,6 +19,14 @@ class PrefManager(private val _context: Context) {
         Gson()
     }
 
+
+    var isFirstTimeLaunch: Boolean
+        get() = pref.getBoolean(IS_FIRST_TIME_LAUNCH, true)
+        set(isFirstTime) {
+            editor.putBoolean(IS_FIRST_TIME_LAUNCH, isFirstTime)
+            editor.commit()
+        }
+
     var voiceEnable: Boolean
         get() = pref.getBoolean(VOICEENABLE, false)
         set(voiceEnable) {
@@ -191,6 +199,7 @@ class PrefManager(private val _context: Context) {
     companion object {
 
         // Shared preferences file name
+        private val IS_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch"
         private val PREF_NAME = "hover"
         private val BANKNAME = "bankname"
         private val VOICEENABLE = "voiceenable"

@@ -23,9 +23,7 @@
     </style>
 
     <style name="buttonBarAlertStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
-
         <item name="android:textColor">@color/colorAccent</item>
-
     </style>
 
 </resources>

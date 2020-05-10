@@ -2,6 +2,7 @@
     <string name="app_name">UnifyPay</string>
     <string name="transaction_type">Type</string>
     <string name="pay">Pay offline</string>
+    <string name="justpay">Pay</string>
     <string name="phoneNumber">Phone number</string>
     <string name="amount">Amount</string>
     <string name="accountNumber">Account number</string>
@@ -42,4 +43,5 @@
     <string name="empty"> </string>
     <string name="voice">Voice</string>
     <string name="voice_title">Enable voice help</string>
+    <string name="unify">unify</string>
 </resources>

@@ -31,7 +31,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".home.HomeActivity">
+        <activity android:name=".home.HomeActivity" />
+
+        <activity android:name=".splash.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
