@@ -759,6 +759,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
             }
 
             transactionTypeSP.setSelection(2)
+            othersSwt.isChecked = true
         }
     }
 
