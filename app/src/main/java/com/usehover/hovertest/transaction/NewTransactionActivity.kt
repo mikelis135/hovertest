@@ -20,54 +20,72 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.hover.sdk.api.HoverParameters
+import com.usehover.hovertest.HoverApp
 import com.usehover.hovertest.R
-import com.usehover.hovertest.model.Transaction
+import com.usehover.hovertest.di.ViewModelFactory
 import com.usehover.hovertest.model.TransactionTypes
-import com.usehover.hovertest.model.TransactionTypes.*
-import com.usehover.hovertest.store.PrefManager
+import com.usehover.hovertest.model.TransactionTypes.Data
 import kotlinx.android.synthetic.main.activity_new_transaction.*
-import java.lang.Boolean.FALSE
-import java.lang.Boolean.TRUE
+import javax.inject.Inject
 
 class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListener {
 
     private val TAG = "NewTransactionActivity"
     private var message = ""
-    private var buttonMessage = ""
     private var advertMessage = ""
     private var transaction = ""
     private var simOSReportedHniValue = ""
-    private var amountValue = "0"
-    private var accountNumberValue = "0"
-    private var dataOptionValue = "0"
-    private var accountOptionValue = "0"
-    private var phoneValue = "0"
+    private var amountValue = ""
+    private var accountNumberValue = ""
+    private var dataOptionValue = ""
+    private var accountOptionValue = ""
+    private var phoneValue = ""
     private var saveTransaction = false
+
+
+    private var transferSelfAction = ""
+    private var airtimeOthersAction = ""
+    private var airtimeSelfAction = ""
+    private var dataOthersAction = ""
+    private var dataSelfAction = ""
+    private var transferOthersAction = ""
+    private var dataBundleAction = ""
+    private var accountResolveAction = ""
+
 
     private var bundleOption = arrayListOf<String>()
     private var bundleValue = arrayListOf<String>()
     private var accountOption = arrayListOf<String>()
     private var accountValue = arrayListOf<String>()
+
     private lateinit var hoverParameters: HoverParameters.Builder
-    private lateinit var prefManager: PrefManager
     private var transactionType: TransactionTypes? = null
     private var lastClickTime = 0L
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: NewTransactionViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        (application as HoverApp).appComponent.inject(this)
+
+        viewModel = ViewModelProvider(this, viewModelFactory)
+                .get(NewTransactionViewModel::class.java)
 
         setContentView(R.layout.activity_new_transaction)
 
         setSupportActionBar(toolbar)
 
-        prefManager = PrefManager(this)
-
         checkTransactionType()
 
-        setUpTransaction()
+        viewModel.setUpTransaction(transactionType)
 
         checkSwitch()
 
@@ -87,6 +105,8 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
         backImg.setOnClickListener {
             finish()
         }
+
+        setUpObservers()
 
     }
 
@@ -109,36 +129,389 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
     private fun pay() {
         singleClick()
         message = "\nTransaction : " + transactionTypeSP.selectedItem.toString() + "\nAmount :  " + "₦" + amount.text.toString() + "\n\n"
-        validateTransaction()
+        var bundle = ""
+        try {
+            bundle = bundleValue[transactionTypeSP.selectedItemPosition]
+        } catch (ignore: java.lang.Exception) {
+
+        }
+        amountValue = amount.text.toString()
+        phoneValue = phoneNumber.text.toString()
+        accountNumberValue = accountNumber.text.toString()
+
+        viewModel.validateTransaction(transactionType, amountValue, phoneValue, message, accountNumberValue, accountOptionValue, transaction, bundle, othersSwt.isChecked, saveTransactionSwt.isChecked)
     }
 
-    private fun getDataBundles(forOthers: Boolean) {
-        singleClick()
-        message = "\nProcessing...\n\n"
-        transaction = "\nGetting Data Bundle"
+    private fun setUpObservers() {
 
+        viewModel.toastLd.observe(this, Observer {
+
+            it?.let {
+                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+            }
+        })
+
+        viewModel.advertMessageLd.observe(this, Observer {
+
+            it?.getContentIfNotHandled()?.let {
+                advertMessage = it
+            }
+        })
+
+        viewModel.transactionTypeLd.observe(this, Observer {
+
+            it?.let {
+                transactionType = it
+            }
+        })
+
+        viewModel.othersSwitchLd.observe(this, Observer {
+
+            it?.let {
+                othersSwt.text = it
+            }
+        })
+
+        viewModel.buttonMessageLd.observe(this, Observer {
+
+            it?.let {
+                payOfflineBtn.text = it
+            }
+        })
+
+        viewModel.animatePhoneLd.observe(this, Observer {
+
+            it?.let {
+                animate(it, phoneNumberLayout)
+            }
+        })
+
+        viewModel.showBankLayoutLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    bankLayout.visibility = View.VISIBLE
+                } else {
+                    bankLayout.visibility = View.GONE
+                }
+            }
+        })
+
+        viewModel.transactionLd.observe(this, Observer {
+
+            it?.let {
+                transaction = it
+            }
+        })
+
+        viewModel.setUpAirtimeLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    setUpAirtime()
+                }
+            }
+        })
+
+        viewModel.setUpDataLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    setUpData()
+                }
+            }
+        })
+
+        viewModel.setUpTransferLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    setUpTransfer()
+                }
+            }
+        })
+
+        viewModel.processAirtimeforSelfLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    startTransaction(prepareAirtimeForSelf())
+                } else {
+                    startTransaction(prepareAirtimeForOthers())
+                }
+            }
+        })
+
+        viewModel.processDataforSelfLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    startTransaction(prepareDataForSelf())
+                } else {
+                    startTransaction(prepareDataForOthers())
+                }
+            }
+        })
+
+        viewModel.processTransferforSameBankLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    startTransaction(prepareTransferForSameBank())
+                } else {
+                    startTransaction(prepareTransferForOtherBanks())
+                }
+            }
+        })
+
+        viewModel.processDataBundleRequestForSelfLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    startTransaction(prepareDataBundleForSelf())
+
+
+                } else {
+                    startTransaction(prepareDataBundleForOthers())
+                }
+
+            }
+        })
+
+        viewModel.processAccountResolveRequestLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    startTransaction(prepareAccountResolve())
+                }
+            }
+        })
+
+        viewModel.saveTransactionLd.observe(this, Observer {
+
+            it?.let {
+                if (it) {
+                    saveTransaction = it
+                }
+            }
+        })
+
+        viewModel.messageLd.observe(this, Observer {
+
+            it?.let {
+                message = it
+            }
+        })
+
+        viewModel.amountValueLd.observe(this, Observer {
+
+            it?.let {
+                amountValue = it
+            }
+        })
+
+        viewModel.accountNumberValueLd.observe(this, Observer {
+
+            it?.let {
+                accountNumberValue = it
+            }
+        })
+
+        viewModel.phoneValueLd.observe(this, Observer {
+
+            it?.let {
+                phoneValue = it
+            }
+        })
+
+        viewModel.simOSReportedHniValueLd.observe(this, Observer {
+
+            it?.let {
+                simOSReportedHniValue = it
+            }
+        })
+
+
+        viewModel.bundleValueLd.observe(this, Observer {
+
+            it?.let {
+                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, it)
+                dataBundleSP.adapter = arrayAdapter
+                dataBundleLayout.visibility = VISIBLE
+            }
+        })
+
+
+        viewModel.accountValueLd.observe(this, Observer {
+
+            it?.let {
+                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, it)
+                bankSP.adapter = arrayAdapter
+                bankLayout.visibility = View.VISIBLE
+            }
+        })
+
+    }
+
+    private fun startTransaction(hoverParameters: HoverParameters.Builder) {
         try {
-            val hoverRequest = checkDataBundleRequest(forOthers)
-            val intent = hoverRequest.buildIntent()
+            val intent = hoverParameters.buildIntent()
             startActivityForResult(intent, 0)
         } catch (e: Exception) {
             Log.e(TAG, e.toString())
         }
     }
 
-    private fun getAccountResolve() {
-        singleClick()
-        message = "\nProcessing...\n\n"
-        transaction = "\nResolving Account Number"
+    private fun prepareAirtimeForSelf(): HoverParameters.Builder {
 
-        try {
-            val hoverRequest = checkAccountResolveRequest()
-            val intent = hoverRequest.buildIntent()
-            startActivityForResult(intent, 0)
-        } catch (e: Exception) {
-            Log.e(TAG, e.toString())
+        viewModel.getAirtimeSelfAction()?.let {
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .style(R.style.AppTheme)
+                    .extra("amount", amountValue)
         }
+
+        return hoverParameters
     }
+
+    private fun prepareAirtimeForOthers(): HoverParameters.Builder {
+
+        viewModel.getAirtimeOthersAction()?.let {
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("phone", phoneValue)
+                    .extra("amount", amountValue)
+        }
+
+
+        return hoverParameters
+    }
+
+    private fun prepareDataForSelf(): HoverParameters.Builder {
+
+        viewModel.getDataSelfAction()?.let {
+            dataOptionValue = bundleOption[dataBundleSP.selectedItemPosition]
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("option", dataOptionValue)
+        }
+
+        return hoverParameters
+    }
+
+    private fun prepareDataForOthers(): HoverParameters.Builder {
+
+        viewModel.getDataOthersAction()?.let {
+            dataOptionValue = bundleOption[dataBundleSP.selectedItemPosition]
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("phone", phoneValue)
+                    .extra("option", dataOptionValue)
+        }
+
+        return hoverParameters
+    }
+
+    private fun prepareTransferForSameBank(): HoverParameters.Builder {
+
+        viewModel.getTransferSelfAction()?.let {
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .style(R.style.AppTheme)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("amount", amountValue)
+                    .extra("account", accountNumberValue)
+        }
+
+        return hoverParameters
+    }
+
+    private fun prepareTransferForOtherBanks(): HoverParameters.Builder {
+
+        viewModel.getTransferOthersAction()?.let {
+            accountOptionValue = accountOption[bankSP.selectedItemPosition]
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("amount", amountValue)
+                    .extra("account", accountNumberValue)
+                    .extra("option", accountOptionValue)
+        }
+
+        return hoverParameters
+    }
+
+    private fun prepareDataBundleForSelf(): HoverParameters.Builder {
+
+        viewModel.getDataBundleAction()?.let {
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(dataBundleAction)
+                    .style(R.style.AppTheme)
+        }
+        return hoverParameters
+    }
+
+    private fun prepareDataBundleForOthers(): HoverParameters.Builder {
+
+        viewModel.getDataBundleAction()?.let {
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("phone", phoneValue)
+        }
+
+        return hoverParameters
+    }
+
+    private fun prepareAccountResolve(): HoverParameters.Builder {
+
+        viewModel.getAccountResolveAction()?.let {
+            hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
+                    .setSim(viewModel.getSimOSReportedHniValue())
+                    .initialProcessingMessage(message + advertMessage)
+                    .setHeader(transaction).request(it)
+                    .style(R.style.AppTheme)
+                    .extra("amount", amountValue)
+                    .extra("account", accountNumberValue)
+        }
+
+        return hoverParameters
+    }
+
+//    private fun getDataBundles(isDataForSelf: Boolean) {
+//        singleClick()
+//        message = "\nProcessing...\n\n"
+//        transaction = "\nGetting Data Bundle"
+//        saveTransaction = saveTransactionSwt.isChecked
+//        phoneValue = phoneNumber.text.toString()
+//        view
+//        simOSReportedHni?.let {
+//            simOSReportedHniValue = it
+//        }
+//
+//        viewModel.checkDataBundleRequest(phoneValue, isDataForSelf, saveTransactionSwt.isChecked)
+
+//    }
 
     private fun singleClick() {
         if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
@@ -148,7 +521,7 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
     }
 
     override fun onResume() {
-        setUpActions()
+        viewModel.setUpActions()
         super.onResume()
     }
 
@@ -163,151 +536,21 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
                 clearAccountResolve()
                 clearDataBundles()
 
-                if (transaction.contains("data bundle", true)) {
+                val sessionTextArr = it.getStringArrayExtra("session_messages")
 
-                    payOfflineBtn.text = getString(R.string.buy_data)
-                    val sessionTextArr = it.getStringArrayExtra("session_messages")
-                    sessionTextArr?.let {
-
-                        try {
-                            val bundle = it.last().substringAfter("\n").substringBeforeLast("\n")
-                            if (bundle.isNotEmpty()) {
-                                val bundleArray = bundle.split("\n")
-                                Log.d(TAG, bundleArray.toString())
-                                bundleArray.forEach {
-                                    val bundleDetails = it.split("-")
-
-                                    if (!bundleDetails.isNullOrEmpty()) {
-                                        bundleOption.add(bundleDetails[0])
-                                        bundleValue.add(bundleDetails[1])
-                                    } else {
-                                        bundleValue.add(it)
-                                    }
-
-                                }
-
-                                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, bundleValue)
-                                dataBundleSP.adapter = arrayAdapter
-                                dataBundleLayout.visibility = VISIBLE
-                            }
-                        } catch (ignore: Exception) {
-
-                        }
-
-                    }
-
-                }
-
-                if (transaction.contains("resolving account", true)) {
-
-                    payOfflineBtn.text = getString(R.string.send_money)
-                    val sessionTextArr = it.getStringArrayExtra("session_messages")
-                    sessionTextArr?.let {
-
-                        try {
-
-                            val bundle = it.last().substringAfter("\n\n").substringBeforeLast("\n")
-                            if (bundle.isNotEmpty()) {
-                                val bundleArray = bundle.split("\n")
-                                Log.d(TAG, bundleArray.toString())
-                                bundleArray.forEach {
-                                    val accountDetails = it.split(".")
-
-                                    if (!accountDetails.isNullOrEmpty()) {
-                                        accountOption.add(accountDetails[0])
-                                        accountValue.add(accountDetails[1])
-                                    } else {
-                                        accountValue.add(it)
-                                    }
-
-                                }
-
-                                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, accountValue)
-                                bankSP.adapter = arrayAdapter
-                                bankLayout.visibility = VISIBLE
-                            }
-                        } catch (ignore: Exception) {
-
-                        }
-                    }
-
+                sessionTextArr?.let {
+                    viewModel.processResult(transaction, it)
                 }
 
                 if (saveTransaction && !transaction.contains("data bundle", true) && !transaction.contains("account resolve", true)) {
 
-                    transactionType?.let {
-                        prefManager.saveTransaction(Transaction(it, "₦$amountValue", phoneValue, message, othersSwt.isChecked, dataOptionValue, accountOptionValue, accountNumberValue, simOSReportedHniValue))
-                    }
+                    viewModel.saveTransaction(transactionType, "₦$amountValue", phoneValue, message, othersSwt.isChecked, dataOptionValue, accountOptionValue, accountNumberValue, simOSReportedHniValue)
 
                 } else {
 
+//                    viewModel.saveTransaction(transactionType, amountValue, phoneValue, message, othersSwt.isChecked, dataOptionValue, accountOptionValue, accountNumberValue, simOSReportedHniValue)
                 }
             }
-        }
-
-    }
-
-    private fun setUpActions() {
-
-        prefManager.fetchActions()?.forEach {
-
-            if (it.name.contains("advert", true)) {
-                val random = 1 + (Math.random() * it.name.split("\\n").size - 2).toInt()
-                prefManager.advert = it.name.split("\\n")[random]
-                advertMessage = it.name.split("\\n")[random]
-            }
-
-            if (it.name.contains(prefManager.bankName.toString(), true)) {
-
-                when {
-                    it.name.contains("airtime self", true) -> prefManager.airtimeSelfAction = it.id
-                    it.name.contains("account balance", true) -> prefManager.accountBalanceAction = it.id
-                    it.name.contains("airtime others", true) -> prefManager.airtimeOthersAction = it.id
-                    it.name.contains("data bundle", true) -> prefManager.dataBundleAction = it.id
-                    it.name.contains("account resolve", true) -> prefManager.accountResolveAction = it.id
-                    it.name.contains("data self", true) -> prefManager.dataSelfAction = it.id
-                    it.name.contains("data others", true) -> prefManager.dataOthersAction = it.id
-                    it.name.contains("transfer self", true) -> prefManager.transferSelfAction = it.id
-                    it.name.contains("transfer others", true) -> prefManager.transferOthersAction = it.id
-                }
-
-            }
-        }
-
-    }
-
-    private fun validateTransaction() {
-        when (transactionType) {
-            Airtime -> validateAirtime()
-            Data -> validateData()
-            Transfer -> validateTransfer()
-        }
-    }
-
-    private fun setUpTransaction() {
-        when (transactionType) {
-            Airtime -> setUpAirtime()
-            Data -> setUpData()
-            Transfer -> setUpTransfer()
-        }
-    }
-
-    private fun processTransaction() {
-
-        transaction = when {
-            transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> getString(R.string.buying_airtime)
-            transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> getString(R.string.buying_data)
-            transactionTypeSP.selectedItem.toString().contains(Transfer.name, true) -> getString(R.string.sending_money)
-            transactionTypeSP.selectedItem.toString().contains(Balance.name, true) -> getString(R.string.account_balance)
-            else -> getString(R.string.empty)
-        }
-
-        try {
-            val hoverRequest = checkActionRequest()
-            val intent = hoverRequest.buildIntent()
-            startActivityForResult(intent, 0)
-        } catch (e: Exception) {
-            Log.e(TAG, e.toString())
         }
 
     }
@@ -322,235 +565,31 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
 
-                when {
-                    transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> {
-                        setUpAirtime()
-                        buttonMessage = getString(R.string.buy_airtime)
-                        setUpText(getString(R.string.self), getString(R.string.others))
-                        transactionType = Airtime
-                    }
-                    transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> {
-                        setUpData()
-                        setUpText(getString(R.string.self), getString(R.string.others))
-                        buttonMessage = getString(R.string.get_data_bundle)
-                        setUpText(getString(R.string.self), getString(R.string.others))
-                        transactionType = Data
-                    }
-                    else -> {
-                        setUpTransfer()
-                        buttonMessage = getString(R.string.send_money)
-                        setUpText(getString(R.string.to, prefManager.bankName), getString(R.string.other_banks))
-                        transactionType = Transfer
-                    }
-                }
-
-                payOfflineBtn.text = buttonMessage
+                viewModel.checkTransactionType(transactionTypeSP.selectedItem.toString(), othersSwt.isChecked)
             }
 
         }
 
-    }
-
-    private fun checkDataBundleRequest(forOthers: Boolean): HoverParameters.Builder {
-
-        saveTransaction = saveTransactionSwt.isChecked
-        phoneValue = phoneNumber.text.toString()
-        prefManager.simOSReportedHni?.let {
-            simOSReportedHniValue = it
-        }
-
-        when (forOthers) {
-
-            TRUE -> {
-                hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                        .setSim(simOSReportedHniValue)
-                        .initialProcessingMessage(message + advertMessage)
-                        .setHeader(transaction).request(prefManager.dataBundleAction)
-                        .style(R.style.AppTheme)
-                        .extra("phone", phoneValue)
-
-            }
-            FALSE -> {
-                hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                        .setSim(simOSReportedHniValue)
-                        .initialProcessingMessage(message + advertMessage)
-                        .setHeader(transaction).request(prefManager.dataBundleAction)
-                        .style(R.style.AppTheme)
-            }
-        }
-
-        return hoverParameters
-    }
-
-    private fun checkAccountResolveRequest(): HoverParameters.Builder {
-
-        prefManager.simOSReportedHni?.let {
-            simOSReportedHniValue = it
-        }
-        accountNumberValue = accountNumber.text.toString()
-
-        hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                .setSim(simOSReportedHniValue)
-                .initialProcessingMessage(message + advertMessage)
-                .setHeader(transaction).request(prefManager.accountResolveAction)
-                .style(R.style.AppTheme)
-                .extra("amount", amountValue)
-                .extra("account", accountNumberValue)
-
-
-        return hoverParameters
-    }
-
-    private fun checkActionRequest(): HoverParameters.Builder {
-
-        saveTransaction = saveTransactionSwt.isChecked
-        phoneValue = phoneNumber.text.toString()
-        accountNumberValue = accountNumber.text.toString()
-
-        prefManager.simOSReportedHni?.let {
-            simOSReportedHniValue = it
-        }
-
-        when (transactionType) {
-
-            Airtime -> when (othersSwt.isChecked) {
-
-                TRUE -> {
-                    hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                            .setSim(simOSReportedHniValue)
-                            .initialProcessingMessage(message + advertMessage)
-                            .setHeader(transaction).request(prefManager.airtimeOthersAction)
-                            .style(R.style.AppTheme)
-                            .extra("phone", phoneValue)
-                            .extra("amount", amountValue)
-                }
-                FALSE -> {
-                    hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                            .setSim(simOSReportedHniValue)
-                            .initialProcessingMessage(message + advertMessage)
-                            .setHeader(transaction).request(prefManager.airtimeSelfAction)
-                            .style(R.style.AppTheme)
-                            .style(R.style.AppTheme)
-                            .extra("amount", amountValue)
-                }
-            }
-
-            Data -> when (othersSwt.isChecked) {
-
-                TRUE -> {
-                    dataOptionValue = bundleOption[dataBundleSP.selectedItemPosition]
-                    hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                            .setSim(simOSReportedHniValue)
-                            .initialProcessingMessage(message + advertMessage)
-                            .setHeader(transaction).request(prefManager.dataOthersAction)
-                            .style(R.style.AppTheme)
-                            .extra("phone", phoneValue)
-                            .extra("option", dataOptionValue)
-
-                }
-                FALSE -> {
-                    dataOptionValue = bundleOption[dataBundleSP.selectedItemPosition]
-                    hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                            .setSim(simOSReportedHniValue)
-                            .initialProcessingMessage(message + advertMessage)
-                            .setHeader(transaction).request(prefManager.dataSelfAction)
-                            .style(R.style.AppTheme)
-                            .extra("option", dataOptionValue)
-                }
-            }
-            Transfer -> when (othersSwt.isChecked) {
-
-                TRUE -> {
-                    accountOptionValue = accountOption[bankSP.selectedItemPosition]
-                    hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                            .setSim(simOSReportedHniValue)
-                            .initialProcessingMessage(message + advertMessage)
-                            .setHeader(transaction).request(prefManager.transferOthersAction)
-                            .style(R.style.AppTheme)
-                            .extra("amount", amountValue)
-                            .extra("account", accountNumberValue)
-                            .extra("option", accountOptionValue)
-                }
-                FALSE -> {
-                    hoverParameters = HoverParameters.Builder(this@NewTransactionActivity)
-                            .style(R.style.AppTheme)
-                            .setSim(simOSReportedHniValue)
-                            .initialProcessingMessage(message + advertMessage)
-                            .setHeader(transaction).request(prefManager.transferSelfAction)
-                            .style(R.style.AppTheme)
-                            .extra("amount", amountValue)
-                            .extra("account", accountNumberValue)
-                }
-            }
-            Balance -> {
-            }
-        }
-
-        return hoverParameters
     }
 
     private fun checkSwitch() {
 
         othersSwt.setOnCheckedChangeListener { _, isChecked ->
 
-            if (isChecked) {
-                othersSwt.text = getString(R.string.others)
-
-                when {
-
-                    transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> {
-                        buttonMessage = getString(R.string.buy_airtime)
-                        setUpText(getString(R.string.self), getString(R.string.others))
-                        animate(true, phoneNumberLayout)
-                    }
-
-                    transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> {
-                        animate(true, phoneNumberLayout)
-                    }
-
-                    transactionTypeSP.selectedItem.toString().contains(Transfer.name, true) -> {
-                        when (accountOption.isNotEmpty()) {
-                            TRUE -> bankLayout.visibility = VISIBLE
-                            FALSE -> bankLayout.visibility = GONE
-                        }
-                        othersSwt.text = getString(R.string.other_banks)
-                        payOfflineBtn.text = getString(R.string.verify_account)
-                    }
-                }
-            } else {
-                othersSwt.text = getString(R.string.self)
-
-                when {
-
-                    transactionTypeSP.selectedItem.toString().contains(Airtime.name, true) -> {
-                        transactionType = Airtime
-                        animate(false, phoneNumberLayout)
-                    }
-
-                    transactionTypeSP.selectedItem.toString().contains(Data.name, true) -> {
-                        animate(false, phoneNumberLayout)
-                    }
-
-                    transactionTypeSP.selectedItem.toString().contains(Transfer.name, true) -> {
-                        bankLayout.visibility = GONE
-                        othersSwt.text = getString(R.string.to, prefManager.bankName)
-                        payOfflineBtn.text = getString(R.string.send_money)
-                    }
-                }
-            }
+            viewModel.checkSwitch(transactionTypeSP.selectedItem.toString(), isChecked, accountOptionValue, transactionType)
 
         }
 
         saveTransactionSwt.setOnCheckedChangeListener { _, isChecked ->
+
             saveTransaction = isChecked
+
             if (isChecked) {
                 saveTransactionSwt.text = getString(R.string.save)
-
             } else {
                 saveTransactionSwt.text = getString(R.string.dont_save)
             }
         }
-
     }
 
     private fun setUpAirtime() {
@@ -579,80 +618,6 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
         bankLayout.visibility = GONE
         animate(true, amountLayout)
         animate(true, accountNumberLayout)
-    }
-
-    private fun validateAirtime() {
-
-        when (othersSwt.isChecked) {
-
-            TRUE -> {
-                if (phoneNumber.text.toString().isNotEmpty() && amount.text.toString().isNotEmpty()) {
-                    message = "\nPhone : " + phoneNumber.text.toString() + "\nTransaction : " + transactionTypeSP.selectedItem.toString() + "\nAmount :  " + "₦" + amount.text.toString() + "\n\n"
-                    amountValue = amount.text.toString()
-                    processTransaction()
-                } else {
-                    Toast.makeText(this, getString(R.string.enter_valid_phone_amount), Toast.LENGTH_LONG).show()
-                }
-            }
-            FALSE -> {
-                if (amount.text.toString().isNotEmpty()) {
-                    message = "\nTransaction : " + transactionTypeSP.selectedItem.toString() + "\nAmount :  " + "₦" + amount.text.toString() + "\n\n"
-                    amountValue = amount.text.toString()
-                    processTransaction()
-                } else {
-                    Toast.makeText(this, getString(R.string.enter_valid_amount), Toast.LENGTH_LONG).show()
-                }
-            }
-
-        }
-    }
-
-    private fun validateData() {
-
-        phoneValue = phoneNumber.text.toString()
-
-        when (othersSwt.isChecked) {
-
-            TRUE -> {
-                if (bundleValue.isNotEmpty() && phoneValue.isNotEmpty()) {
-                    message = "\nPhone : " + phoneValue + "\nTransaction : " + transactionTypeSP.selectedItem.toString() + "\n\n"
-                    amountValue = amount.text.toString()
-                    processTransaction()
-                } else if (bundleValue.isEmpty() && phoneValue.isNotEmpty()) {
-                    getDataBundles(true)
-                } else if (phoneValue.isEmpty()) {
-                    Toast.makeText(this, getString(R.string.enter_valid_phone), Toast.LENGTH_LONG).show()
-                }
-            }
-
-            FALSE -> {
-                message = "\nTransaction : " + transactionTypeSP.selectedItem.toString() + "\n\n"
-
-                if (bundleValue.isEmpty()) {
-                    getDataBundles(false)
-                } else {
-                    message = "\nTransaction : " + transactionTypeSP.selectedItem.toString() + "\nData plan :  " + bundleValue[dataBundleSP.selectedItemPosition] + "\n\n"
-                    amountValue = bundleValue[dataBundleSP.selectedItemPosition]
-                    processTransaction()
-                }
-            }
-
-        }
-    }
-
-    private fun validateTransfer() {
-        if (accountNumber.text.toString().isNotEmpty() && amount.text.toString().isNotEmpty()) {
-            amountValue = amount.text.toString()
-            if (othersSwt.isChecked && accountOption.isEmpty()) {
-                getAccountResolve()
-            } else if (othersSwt.isChecked && accountOption.isNotEmpty()) {
-                processTransaction()
-            } else if (!othersSwt.isChecked) {
-                processTransaction()
-            }
-        } else {
-            Toast.makeText(this, getString(R.string.enter_valid_account_amount), Toast.LENGTH_LONG).show()
-        }
     }
 
     private fun animate(show: Boolean, layout: ConstraintLayout) {
@@ -725,15 +690,6 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
         })
     }
 
-    private fun setUpText(offText: String, onText: String) {
-
-        if (othersSwt.isChecked) {
-            othersSwt.text = onText
-        } else {
-            othersSwt.text = offText
-        }
-    }
-
     private fun clearAccountResolve() {
         accountOption.clear()
         accountValue.clear()
@@ -762,6 +718,5 @@ class NewTransactionActivity : AppCompatActivity(), TextView.OnEditorActionListe
             othersSwt.isChecked = true
         }
     }
-
 
 }

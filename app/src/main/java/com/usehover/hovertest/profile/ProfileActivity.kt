@@ -4,23 +4,33 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.hover.sdk.api.Hover
 import com.hover.sdk.permissions.PermissionActivity
+import com.usehover.hovertest.HoverApp
 import com.usehover.hovertest.R
-import com.usehover.hovertest.store.PrefManager
+import com.usehover.hovertest.di.ViewModelFactory
 import kotlinx.android.synthetic.main.profile_activity.*
+import javax.inject.Inject
 
 class ProfileActivity : AppCompatActivity() {
 
-    private lateinit var prefManager: PrefManager
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: ProfileViewModel
     private var simOSReportedHni = arrayListOf<String>()
-    private var simName = arrayListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.profile_activity)
 
-        prefManager = PrefManager(this)
+
+        (application as HoverApp).appComponent.inject(this)
+
+        viewModel = ViewModelProvider(this, viewModelFactory)
+                .get(ProfileViewModel::class.java)
 
         setupSim()
 
@@ -29,10 +39,28 @@ class ProfileActivity : AppCompatActivity() {
             finish()
         }
 
-        simSP.setSelection(prefManager.simPosition)
-        bankSP.setSelection(prefManager.bankPosition)
-        voiceSwt.isChecked = prefManager.voiceEnable
+        voiceSwt.isChecked = viewModel.isVoiceEnabled()
+        bankSP.setSelection(viewModel.getBankPosition())
 
+        setupObservers()
+
+    }
+
+    private fun setupObservers() {
+
+        viewModel.simLd.observe(this, Observer {
+            it?.let {
+                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, it)
+                simSP.adapter = arrayAdapter
+                simSP.setSelection(viewModel.getSimPosition())
+            }
+        })
+
+        viewModel.simOSReportedHniLd.observe(this, Observer {
+            it?.let {
+                simOSReportedHni = it
+            }
+        })
     }
 
     override fun onPause() {
@@ -44,16 +72,12 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun saveProfile() {
 
-        prefManager.voiceEnable = voiceSwt.isChecked
-        prefManager.bankName = bankSP.selectedItem.toString()
-        prefManager.bankPosition = bankSP.selectedItemPosition
-        prefManager.simPosition = simSP.selectedItemPosition
+        viewModel.saveVoice(voiceSwt.isChecked)
+        viewModel.saveBankName(bankSP.selectedItem.toString())
+        viewModel.saveBankPosition(bankSP.selectedItemPosition)
+        viewModel.saveSimPosition(simSP.selectedItemPosition)
+        viewModel.saveSimOSReportedHni(simOSReportedHni[simSP.selectedItemPosition])
 
-        prefManager.simOSReportedHni?.let {
-            if (simOSReportedHni.isNotEmpty()) {
-                prefManager.simOSReportedHni = simOSReportedHni[simSP.selectedItemPosition]
-            }
-        }
     }
 
     private fun setupSim() {
@@ -63,15 +87,9 @@ class ProfileActivity : AppCompatActivity() {
             finish()
             startActivityForResult(Intent(applicationContext, PermissionActivity::class.java), 0)
         } else {
-            prefManager.fetchSim()?.let {
 
-                it.forEach {
-                    simOSReportedHni.add(it.osReportedHni.toString())
-                    simName.add(it.operatorName.toString())
-                }
-                val arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, simName)
-                simSP.adapter = arrayAdapter
-            }
+            viewModel.fetchSim()
+
         }
 
 
